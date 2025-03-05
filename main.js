@@ -115,6 +115,16 @@ class RequestHandler {
           continue;
         }
 
+        if (status === 401) {
+          logger.error(`服务器错误 (401)`, `尝试 ${i + 1}/${retries}`, error);
+          if (isLastRetry) break;
+
+          const waitTime = backoffMs * Math.pow(1.5, i);
+          logger.warn(`等待 ${waitTime / 1000}秒后重试...`);
+          await delay(waitTime / 1000);
+          continue;
+        }
+
         if (isLastRetry) {
           logger.error(`达到最大重试次数`, "", error);
           return null;
